@@ -58,27 +58,38 @@ function Beatpad() {
             alert("Kit not found!");
             return;
           }
-          // The backend returns a list of pads. We need to merge them into our 16-pad state.
-          const loadedPads = [...pads];
+          // Clear any currently playing sounds
+          Object.values(audioPlayers.current).forEach(player => player.unload());
+          audioPlayers.current = {};
+
+          // Start with a clean slate of 16 pads
+          const freshPads = Array.from({ length: 16 }).map((_, i) => ({
+            padIndex: i + 1,
+            keyBinding: '',
+            soundUrl: null,
+            file: null,
+            config: { cut: 'playTillEnd', trigger: 'press' }
+          }));
+
           data.pads.forEach(loadedPad => {
             const index = loadedPad.padIndex - 1;
             
-            // If the URL starts with http (like our GitHub default sounds), don't prepend localhost!
+            // If the URL starts with http (Cloudinary), don't prepend localhost!
             const finalUrl = loadedPad.soundUrl 
-              ? (loadedPad.soundUrl.startsWith('http') ? loadedPad.soundUrl : `http://localhost:5000${loadedPad.soundUrl}`)
+              ? (loadedPad.soundUrl.startsWith('http') ? loadedPad.soundUrl : `${API_URL}${loadedPad.soundUrl}`)
               : null;
 
-            loadedPads[index] = {
-              ...loadedPads[index],
+            freshPads[index] = {
+              ...freshPads[index],
               keyBinding: loadedPad.keyBinding,
               soundUrl: finalUrl,
               config: loadedPad.config
             };
           });
 
-          // Initialize Howler for ALL pads that have a sound URL (both loaded ones and defaults)
-          loadedPads.forEach(pad => {
-            if (pad.soundUrl && !audioPlayers.current[pad.padIndex]) {
+          // Initialize Howler for the new loaded sounds
+          freshPads.forEach(pad => {
+            if (pad.soundUrl) {
               audioPlayers.current[pad.padIndex] = new Howl({
                 src: [pad.soundUrl],
                 format: ['wav', 'mp3']
@@ -86,7 +97,7 @@ function Beatpad() {
             }
           });
 
-          setPads(loadedPads);
+          setPads(freshPads);
           setKitId(data.id);
         })
         .catch(err => console.error("Error fetching kit:", err));
