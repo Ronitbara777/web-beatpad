@@ -1,13 +1,4 @@
-# 🥁 MERN Beatpad Walkthrough
-
-Congratulations! You have successfully built, tested, and deployed a **Full-Stack MERN Cloud Application**. 
-
-This wasn't just a simple frontend tutorial—you architected a highly robust application that handles real-time audio, cloud storage, database routing, and deployment environments.
-
-Here is a look back at everything you accomplished:
-
 ---
-
 ## 🏗️ Architecture Overview
 
 ### 1. Frontend (React + Vite)
