@@ -41,6 +41,7 @@ function Beatpad() {
   const [selectedPadIndex, setSelectedPadIndex] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [kitId, setKitId] = useState(id || null);
+  const [loadKitInput, setLoadKitInput] = useState('');
 
   // We use a ref to store the Howl audio instances so they don't cause re-renders
   const audioPlayers = useRef({});
@@ -259,6 +260,21 @@ function Beatpad() {
     })));
     Object.values(audioPlayers.current).forEach(player => player.unload());
     audioPlayers.current = {};
+    setKitId(null);
+    navigate('/');
+  };
+
+  const handleLoadKitSubmit = (e) => {
+    e.preventDefault();
+    if (loadKitInput.trim()) {
+      let finalId = loadKitInput.trim();
+      // If they pasted a full URL, extract just the ID
+      if (finalId.includes('/')) {
+        finalId = finalId.split('/').filter(Boolean).pop();
+      }
+      navigate(`/${finalId}`);
+      setLoadKitInput('');
+    }
   };
 
   const activePad = pads.find(p => p.padIndex === selectedPadIndex);
@@ -266,7 +282,19 @@ function Beatpad() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1>ONLINE BEATPAD {kitId && <span className="kit-badge">Kit: {kitId}</span>}</h1>
+        <div className="header-brand">
+          <h1>ONLINE BEATPAD {kitId && <span className="kit-badge">Kit: {kitId}</span>}</h1>
+          <form className="load-kit-form" onSubmit={handleLoadKitSubmit}>
+            <input 
+              type="text" 
+              placeholder="Paste Kit ID or URL" 
+              value={loadKitInput}
+              onChange={(e) => setLoadKitInput(e.target.value)}
+              className="load-input"
+            />
+            <button type="submit" className="load-btn">Load</button>
+          </form>
+        </div>
         <div className="header-actions">
           <button className="settings-btn" onClick={clearKit} style={{marginRight: '10px', backgroundColor: '#555', color: 'white'}}>Clear All</button>
           <button className="settings-btn" onClick={loadDefaultKit} style={{marginRight: '20px'}}>Load Default</button>
